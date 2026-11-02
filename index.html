@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pahlawan Cilik Pemilah Sampah - Modul P5 IPAS SD</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    .font-game {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+    .bin-lid {
+      transform-origin: bottom center;
+      transition: transform 0.2s ease-in-out;
+    }
+    .bin-container:hover .bin-lid, .bin-active .bin-lid {
+      transform: rotate(-25deg) translateY(-8px);
+    }
+    .drag-over {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 15px rgba(34, 197, 94, 0.6));
+    }
+    .drag-over-blue {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.6));
+    }
+    @keyframes pulse-shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px) rotate(-3deg); }
+      40%, 80% { transform: translateX(8px) rotate(3deg); }
+    }
+    .animate-shake {
+      animation: pulse-shake 0.4s ease-in-out;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #certificate-modal, #certificate-modal * {
+        visibility: visible;
+      }
+      #certificate-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-100 min-h-screen text-slate-800 flex flex-col justify-between">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="bg-white/80 backdrop-blur-md border-b border-emerald-100 sticky top-0 z-30 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="showScreen('menu-screen')">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-2xl shadow-lg shadow-emerald-200">
+          🌱
+        </div>
+        <div>
+          <h1 id="app-title-text" class="font-game text-xl text-emerald-800 leading-tight">Pahlawan Cilik Pemilah Sampah</h1>
+          <p class="text-xs text-slate-500 font-medium">Modul P5 IPAS - Gaya Hidup Berkelanjutan</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAudio()" id="audio-btn" class="px-3 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+          🔊 <span id="audio-status">Suara: ON</span>
+        </button>
+        <button onclick="openEncyclopedia()" class="px-3 py-2 bg-cyan-100 hover:bg-cyan-200 text-cyan-800 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+          📚 Ensiklopedia (24)
+        </button>
+        <button onclick="openSettings()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+          ⚙️ Pengaturan
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto w-full p-4 flex-grow flex flex-col justify-center">
+
+    <!-- 1. MAIN MENU SCREEN -->
+    <div id="menu-screen" class="space-y-6 max-w-4xl mx-auto w-full py-4">
+      <!-- HERO CARD -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-emerald-900/5 border border-emerald-100 text-center relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-100 rounded-full blur-2xl opacity-60"></div>
+        <div class="absolute -left-10 -top-10 w-40 h-40 bg-teal-100 rounded-full blur-2xl opacity-60"></div>
+        
+        <span class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 font-semibold text-xs rounded-full mb-3">
+          🎓 Game Edukasi Interaktif SD
+        </span>
+        <h2 id="menu-hero-title" class="font-game text-3xl sm:text-5xl text-slate-800 mb-3 leading-tight">
+          Pahlawan Cilik Pemilah Sampah:<br><span class="text-emerald-600">Misi Selamatkan Bumi!</span>
+        </h2>
+        <p class="text-slate-600 text-sm sm:text-base max-w-2xl mx-auto mb-6">
+          Mari belajar memilah sampah Organik (bisa membusuk) dan Anorganik (tidak bisa membusuk) secara menyenangkan! Kumpulkan bintang emas dan sertifikat P5-mu!
+        </p>
+
+        <!-- FASE / MODE SELECTION -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left">
+          <div onclick="selectPhase('A')" id="phase-card-A" class="p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50/50 cursor-pointer transition hover:shadow-md relative">
+            <span class="absolute top-3 right-3 text-xs bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-md">Fase A</span>
+            <div class="text-2xl mb-1">🌱 Kelas 1 - 3</div>
+            <div class="font-bold text-slate-800 text-sm">Mode Eksplorasi Santai</div>
+            <div class="text-xs text-slate-500 mt-1">Tanpa batas waktu. Fokus mengenal bentuk & ciri sampah.</div>
+          </div>
+          <div onclick="selectPhase('B')" id="phase-card-B" class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-teal-400 cursor-pointer transition hover:shadow-md relative">
+            <span class="absolute top-3 right-3 text-xs bg-teal-600 text-white font-bold px-2 py-0.5 rounded-md">Fase B</span>
+            <div class="text-2xl mb-1">🔍 Kelas 3 - 4</div>
+            <div class="font-bold text-slate-800 text-sm">Detektif Sampah</div>
+            <div class="text-xs text-slate-500 mt-1">Inspeksi ciri bahan fisik & dampak penguraian tanah.</div>
+          </div>
+          <div onclick="selectPhase('C')" id="phase-card-C" class="p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-cyan-400 cursor-pointer transition hover:shadow-md relative">
+            <span class="absolute top-3 right-3 text-xs bg-cyan-600 text-white font-bold px-2 py-0.5 rounded-md">Fase C</span>
+            <div class="text-2xl mb-1">⚡ Kelas 5 - 6</div>
+            <div class="font-bold text-slate-800 text-sm">Operasi Pilah Cepat</div>
+            <div class="text-xs text-slate-500 mt-1">Tantangan timer 10 detik per soal! Uji reflekmu.</div>
+          </div>
+        </div>
+
+        <!-- MODE PLAY BUTTONS -->
+        <div class="flex flex-wrap justify-center gap-4">
+          <button onclick="startSinglePlayer()" class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-game text-xl rounded-2xl shadow-lg shadow-emerald-500/30 hover:scale-105 transition transform flex items-center gap-3">
+            <span>🎮</span> Main Solo / Mandiri
+          </button>
+          <button onclick="startTournamentSetup()" class="px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-game text-lg rounded-2xl shadow-lg shadow-purple-500/30 hover:scale-105 transition transform flex items-center gap-2">
+            <span>👥</span> Turnamen Kelompok
+          </button>
+          <button onclick="startDuelMode()" class="px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-game text-lg rounded-2xl shadow-lg shadow-orange-500/30 hover:scale-105 transition transform flex items-center gap-2">
+            <span>⚔️</span> Duel 2 Player
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. GAMEPLAY SCREEN (SINGLE / TOURNAMENT) -->
+    <div id="game-screen" class="hidden space-y-4 max-w-4xl mx-auto w-full">
+      <!-- STATUS BAR -->
+      <div class="bg-white/90 backdrop-blur rounded-2xl p-4 shadow-md border border-emerald-100 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-4">
+          <!-- Lives Display -->
+          <div class="flex items-center gap-1 bg-red-50 border border-red-200 px-3 py-1.5 rounded-xl">
+            <span class="text-xs font-bold text-red-700">NYAWA:</span>
+            <span id="lives-display" class="text-lg">❤️❤️❤️</span>
+          </div>
+          <!-- Score Display -->
+          <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl">
+            <span class="text-xs font-bold text-emerald-800">SKOR:</span>
+            <span id="score-display" class="font-game text-xl text-emerald-600">0</span>
+            <span class="text-xs text-slate-400">/ 100</span>
+          </div>
+          <!-- Stars -->
+          <div id="stars-display" class="text-lg">⭐⭐⭐</div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Timer (Fase C) -->
+          <div id="timer-box" class="hidden flex items-center gap-1 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+            <span class="text-xs font-bold text-amber-800">WAKTU:</span>
+            <span id="timer-display" class="font-game text-lg text-amber-600">10s</span>
+          </div>
+          <!-- Current Group Badge (if tournament) -->
+          <div id="group-turn-badge" class="hidden px-3 py-1.5 bg-purple-100 text-purple-800 font-bold rounded-xl text-xs">
+            Kelompok 1
+          </div>
+          <button onclick="shuffleCurrentItems()" title="Acak Gambar Sampah" class="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-bold transition">
+            🎲 Acak
+          </button>
+        </div>
+      </div>
+
+      <!-- MAIN PLAY AREA -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <!-- TONG SAMPAH ORGANIK (HIJAU) -->
+        <div id="bin-organik" class="bin-container bg-white rounded-3xl p-6 shadow-xl border-4 border-emerald-400 text-center flex flex-col items-center justify-between min-h-[260px] transition transform hover:-translate-y-1">
+          <div class="w-full">
+            <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold text-xs rounded-full">TONG HIJAU</span>
+            <h3 class="font-game text-2xl text-emerald-700 mt-1">ORGANIK</h3>
+            <p class="text-xs text-slate-500">Bisa Membusuk Alami 🌿</p>
+          </div>
+          <!-- SVG Bin Icon -->
+          <div class="my-4 relative w-24 h-24">
+            <svg class="w-full h-full text-emerald-500" viewBox="0 0 100 100" fill="none">
+              <path class="bin-lid" d="M20 30 H80 L75 20 H25 Z" fill="#10B981"/>
+              <rect x="25" y="32" width="50" height="55" rx="6" fill="#059669"/>
+              <path d="M40 45 V72 M50 45 V72 M60 45 V72" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <button onclick="handleSorting('ORGANIK')" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-game text-base rounded-xl shadow-md transition">
+            Buang Ke Sini (⬅️)
+          </button>
+        </div>
+
+        <!-- WASTE ITEM CARD -->
+        <div class="flex flex-col items-center">
+          <div id="item-card" draggable="true" class="w-full bg-white rounded-3xl p-6 shadow-2xl border-2 border-slate-100 text-center cursor-grab active:cursor-grabbing transition transform hover:scale-105 relative">
+            <div class="absolute top-3 right-3 text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-bold" id="item-counter">
+              1 / 10
+            </div>
+            <!-- Dynamic SVG Illustration Container -->
+            <div id="item-svg-container" class="w-32 h-32 mx-auto mb-3 flex items-center justify-center">
+              <!-- SVG injected via JS -->
+            </div>
+            <h4 id="item-name" class="font-game text-2xl text-slate-800 mb-1">Sisa Apel</h4>
+            <p id="item-desc" class="text-xs text-slate-500 leading-relaxed min-h-[36px]">
+              Berasal dari buah alami yang dimakan, mengandung air, dan bertekstur lunak.
+            </p>
+          </div>
+          <p class="text-xs text-slate-400 mt-3 text-center">
+            💡 Tarik kartu ke tong sampah atau tekan tombol panah ⬅️ / ➡️
+          </p>
+        </div>
+
+        <!-- TONG SAMPAH ANORGANIK (BIRU) -->
+        <div id="bin-anorganik" class="bin-container bg-white rounded-3xl p-6 shadow-xl border-4 border-blue-400 text-center flex flex-col items-center justify-between min-h-[260px] transition transform hover:-translate-y-1">
+          <div class="w-full">
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 font-bold text-xs rounded-full">TONG BIRU</span>
+            <h3 class="font-game text-2xl text-blue-700 mt-1">ANORGANIK</h3>
+            <p class="text-xs text-slate-500">Tidak Bisa Membusuk ♻️</p>
+          </div>
+          <!-- SVG Bin Icon -->
+          <div class="my-4 relative w-24 h-24">
+            <svg class="w-full h-full text-blue-500" viewBox="0 0 100 100" fill="none">
+              <path class="bin-lid" d="M20 30 H80 L75 20 H25 Z" fill="#3B82F6"/>
+              <rect x="25" y="32" width="50" height="55" rx="6" fill="#2563EB"/>
+              <path d="M40 45 V72 M50 45 V72 M60 45 V72" stroke="white" stroke-width="4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <button onclick="handleSorting('ANORGANIK')" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-game text-base rounded-xl shadow-md transition">
+            Buang Ke Sini (➡️)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. DUEL MODE SCREEN (2 PLAYER SPLIT SCREEN) -->
+    <div id="duel-screen" class="hidden space-y-4 w-full">
+      <div class="flex justify-between items-center bg-white/90 backdrop-blur rounded-2xl p-3 border border-slate-200">
+        <button onclick="showScreen('menu-screen')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-xs font-bold rounded-xl">
+          ← Kembali Ke Menu
+        </button>
+        <h2 class="font-game text-xl text-center text-slate-800">⚔️ Mode Duel 2 Pemain / Tim</h2>
+        <div class="text-xs font-bold text-slate-500">Target: 100 Poin</div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- PLAYER 1 (LEFT / GREEN) -->
+        <div class="bg-emerald-50/70 rounded-3xl p-4 border-2 border-emerald-300 space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="font-game text-lg text-emerald-800">Pemain 1 (Tim Hijau)</span>
+            <div class="text-sm font-bold text-emerald-600">Skor: <span id="p1-score">0</span></div>
+          </div>
+          <div class="text-xs text-slate-500">Kontrol Keyboard: <kbd class="px-1.5 py-0.5 bg-white rounded border">W</kbd> = Organik | <kbd class="px-1.5 py-0.5 bg-white rounded border">S</kbd> = Anorganik</div>
+          
+          <div id="p1-card" class="bg-white rounded-2xl p-4 text-center border shadow-md min-h-[180px] flex flex-col justify-center items-center">
+            <div id="p1-svg" class="w-20 h-20 mb-2"></div>
+            <h4 id="p1-name" class="font-game text-lg">Sisa Apel</h4>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="handleDuelSort(1, 'ORGANIK')" class="py-3 bg-emerald-500 text-white font-bold rounded-xl text-sm">
+              🌿 Organik (W)
+            </button>
+            <button onclick="handleDuelSort(1, 'ANORGANIK')" class="py-3 bg-blue-500 text-white font-bold rounded-xl text-sm">
+              ♻️ Anorganik (S)
+            </button>
+          </div>
+        </div>
+
+        <!-- PLAYER 2 (RIGHT / BLUE) -->
+        <div class="bg-blue-50/70 rounded-3xl p-4 border-2 border-blue-300 space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="font-game text-lg text-blue-800">Pemain 2 (Tim Biru)</span>
+            <div class="text-sm font-bold text-blue-600">Skor: <span id="p2-score">0</span></div>
+          </div>
+          <div class="text-xs text-slate-500">Kontrol Keyboard: <kbd class="px-1.5 py-0.5 bg-white rounded border">↑</kbd> = Organik | <kbd class="px-1.5 py-0.5 bg-white rounded border">↓</kbd> = Anorganik</div>
+
+          <div id="p2-card" class="bg-white rounded-2xl p-4 text-center border shadow-md min-h-[180px] flex flex-col justify-center items-center">
+            <div id="p2-svg" class="w-20 h-20 mb-2"></div>
+            <h4 id="p2-name" class="font-game text-lg">Botol Plastik</h4>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="handleDuelSort(2, 'ORGANIK')" class="py-3 bg-emerald-500 text-white font-bold rounded-xl text-sm">
+              🌿 Organik (↑)
+            </button>
+            <button onclick="handleDuelSort(2, 'ANORGANIK')" class="py-3 bg-blue-500 text-white font-bold rounded-xl text-sm">
+              ♻️ Anorganik (↓)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white/60 backdrop-blur border-t border-slate-100 py-3 text-center text-xs text-slate-500 mt-6">
+    Modul & Naskah Game Edukasi P5 - Gaya Hidup Berkelanjutan SD | 100% Offline Friendly
+  </footer>
+
+  <!-- MODALS SECTION -->
+
+  <!-- 1. FEEDBACK WRONG SORT MODAL (COBA LAGI) -->
+  <div id="wrong-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-4 border-amber-300 text-center space-y-4 animate-shake">
+      <div class="text-5xl mb-2">YAH, AYO COBA LAGI! 💪🌱</div>
+      <h3 class="font-game text-xl text-slate-800">Jangan Berkecil Hati! Pahlawan Sejati Selalu Belajar dari Kesalahan!</h3>
+      <p id="wrong-reason" class="text-xs text-slate-600 bg-amber-50 p-3 rounded-xl text-left border border-amber-200 leading-relaxed">
+        <!-- Reason injected via JS -->
+      </p>
+      <div class="bg-slate-50 p-3 rounded-xl text-left space-y-1 text-xs text-slate-600">
+        <div class="font-bold text-slate-700">Ingat ya, sahabat kecil:</div>
+        <div>🌿 <b>Tong HIJAU (Organik):</b> Sisa makanan, kulit buah, & dedaunan yang bisa membusuk.</div>
+        <div>♻️ <b>Tong BIRU (Anorganik):</b> Plastik, kaleng soda, & kaca yang tidak bisa membusuk alami.</div>
+      </div>
+      <button onclick="closeWrongModal()" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-game text-base rounded-2xl shadow-lg hover:brightness-110 transition">
+        Aku Mau Coba Lagi Sekarang! 🚀
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. GAME OVER MODAL (NYAWA HABIS) -->
+  <div id="gameover-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border-4 border-red-300 text-center space-y-4">
+      <div class="text-5xl">💔🌱</div>
+      <h3 class="font-game text-2xl text-red-600">YAH, NYAWA HABIS!</h3>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Nyawamu sudah habis. Tapi tidak apa-apa, kamu bisa isi ulang nyawa untuk melanjutkan belajar!
+      </p>
+      <div class="space-y-2">
+        <button onclick="refillLivesAndContinue()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition">
+          💖 Isi Ulang 3 Nyawa & Lanjutkan
+        </button>
+        <button onclick="restartCurrentGame()" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition">
+          🎲 Ulang dari Awal (Acak Gambar Baru)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. WINNER MODAL (HORE! KAMU MENANG!) -->
+  <div id="win-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border-4 border-emerald-400 text-center space-y-4">
+      <div class="text-5xl animate-bounce">🏆🌟</div>
+      <h3 class="font-game text-3xl text-emerald-700">HORE! KAMU MENANG!</h3>
+      <p class="font-bold text-slate-800 text-sm">Hebat Sekali! Kamu Resmi Jadi 'Pahlawan Cilik Pemilah Sampah'!</p>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        Semua sampah berhasil kamu pilah ke tong yang benar. Berkat bantuanmu, sekolah dan bumi kita jadi lebih bersih, asri, dan terbebas dari tumpukan sampah yang berbahaya bagi lingkungan.
+      </p>
+      <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-xl text-left text-xs text-emerald-900">
+        <span class="font-bold">Pesan Bijak Hari Ini:</span> Sampah organik bisa disulap jadi pupuk tanaman, sedangkan sampah anorganik bisa didaur ulang jadi barang berguna. Yuk, biasakan memilah sampah di rumah dan sekolah setiap hari!
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button onclick="restartCurrentGame()" class="flex-1 py-3 bg-emerald-600 text-white font-game text-sm rounded-xl hover:bg-emerald-700 transition">
+          Mainkan Lagi & Pecahkan Rekor! 🔁
+        </button>
+        <button onclick="openCertificateModal()" class="flex-1 py-3 bg-amber-500 text-white font-game text-sm rounded-xl hover:bg-amber-600 transition">
+          🎓 Cetak Sertifikat P5
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ENCYCLOPEDIA MODAL -->
+  <div id="encyclopedia-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+      <div class="p-4 bg-emerald-600 text-white flex justify-between items-center">
+        <h3 class="font-game text-xl">📚 Ensiklopedia Sampah (24 Jenis Benda)</h3>
+        <button onclick="closeEncyclopedia()" class="text-2xl hover:opacity-80">&times;</button>
+      </div>
+      <div class="p-4 bg-slate-50 border-b flex flex-wrap gap-2">
+        <input type="text" id="enc-search" oninput="filterEncyclopedia()" placeholder="Cari benda sampah..." class="px-3 py-2 border rounded-xl text-xs flex-grow">
+        <button onclick="filterEncCategory('ALL')" class="px-3 py-1.5 bg-slate-200 rounded-xl text-xs font-bold">Semua</button>
+        <button onclick="filterEncCategory('ORGANIK')" class="px-3 py-1.5 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-bold">🌿 Organik</button>
+        <button onclick="filterEncCategory('ANORGANIK')" class="px-3 py-1.5 bg-blue-100 text-blue-800 rounded-xl text-xs font-bold">♻️ Anorganik</button>
+      </div>
+      <div id="encyclopedia-grid" class="p-4 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 flex-grow">
+        <!-- Cards injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. TOURNAMENT SETUP MODAL -->
+  <div id="tournament-setup-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl text-center space-y-4">
+      <h3 class="font-game text-2xl text-purple-700">👥 Turnamen Kelompok Kelas</h3>
+      <p class="text-xs text-slate-500">Pilih jumlah kelompok yang akan bertanding secara bergantian:</p>
+      
+      <div class="grid grid-cols-3 gap-3">
+        <button onclick="setTournamentGroups(2)" class="p-4 border-2 border-purple-200 rounded-2xl hover:border-purple-500 font-bold text-lg text-purple-700">2 Kelompok</button>
+        <button onclick="setTournamentGroups(3)" class="p-4 border-2 border-purple-200 rounded-2xl hover:border-purple-500 font-bold text-lg text-purple-700">3 Kelompok</button>
+        <button onclick="setTournamentGroups(4)" class="p-4 border-2 border-purple-200 rounded-2xl hover:border-purple-500 font-bold text-lg text-purple-700">4 Kelompok</button>
+      </div>
+
+      <button onclick="closeModal('tournament-setup-modal')" class="w-full py-2 bg-slate-100 text-slate-600 font-bold text-xs rounded-xl">Batal</button>
+    </div>
+  </div>
+
+  <!-- 6. TOURNAMENT LEADERBOARD MODAL -->
+  <div id="tournament-leaderboard-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl text-center space-y-4">
+      <div class="text-4xl">🏆 Klasemen Juara Turnamen</div>
+      <h3 class="font-game text-2xl text-slate-800">Hasil Akhir Kelompok Kelas</h3>
+      
+      <div id="leaderboard-list" class="space-y-2 text-left">
+        <!-- Leaderboard items injected via JS -->
+      </div>
+
+      <button onclick="showScreen('menu-screen'); closeModal('tournament-leaderboard-modal');" class="w-full py-3 bg-purple-600 text-white font-bold rounded-xl">
+        Kembali Ke Menu Utama 🏠
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. SETTINGS MODAL -->
+  <div id="settings-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <h3 class="font-game text-xl">⚙️ Pengaturan Game</h3>
+        <button onclick="closeModal('settings-modal')" class="text-xl">&times;</button>
+      </div>
+      
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold block mb-1">Jumlah Nyawa Per Game:</label>
+          <select id="setting-lives" onchange="updateSettings()" class="w-full p-2 border rounded-xl">
+            <option value="3">3 Nyawa (Standar SD)</option>
+            <option value="5">5 Nyawa (Ramah Anak / Mudah)</option>
+            <option value="999">Tak Terbatas ♾️ (Mode Latihan Bebas)</option>
+          </select>
+        </div>
+        <div>
+          <label class="font-bold block mb-1">Efek Audio & Suara Synthesizer:</label>
+          <button onclick="toggleAudio()" class="w-full p-2 bg-slate-100 rounded-xl font-bold">
+            Aktifkan / Matikan Suara
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CERTIFICATE MODAL (PORTOFOLIO P5) -->
+  <div id="certificate-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-8 shadow-2xl border-8 border-emerald-600 relative space-y-4 text-center">
+      <button onclick="closeModal('certificate-modal')" class="no-print absolute top-4 right-4 text-2xl font-bold text-slate-400">&times;</button>
+      
+      <div class="text-emerald-700 font-bold text-sm tracking-widest uppercase">SERTIFIKAT PENGHARGAAN P5</div>
+      <h2 class="font-game text-3xl text-slate-800">PAHLAWAN LINGKUNGAN CILIK</h2>
+      <p class="text-xs text-slate-500">Diberikan sebagai bentuk apresiasi pencapaian dalam kelulusan simulasi pemilahan sampah IPAS:</p>
+
+      <div class="py-2 space-y-2 border-y border-dashed border-emerald-200">
+        <input type="text" id="cert-student-name" placeholder="[ Ketik Nama Siswa Di Sini ]" class="w-full text-center font-game text-2xl text-emerald-800 focus:outline-none bg-transparent border-b border-emerald-300">
+        <div class="flex gap-2 justify-center text-xs text-slate-600">
+          <input type="text" id="cert-school-name" placeholder="Nama Sekolah SD" class="text-center focus:outline-none border-b border-slate-300">
+          <span>•</span>
+          <input type="text" id="cert-class-name" placeholder="Kelas / Fase" class="text-center focus:outline-none border-b border-slate-300">
+        </div>
+      </div>
+
+      <div class="text-xs text-slate-600 leading-relaxed italic">
+        "Telah berhasil memilah sampah Organik & Anorganik dengan sempurna (Skor 100/100) serta berkomitmen menjaga kebersihan bumi dan lingkungan sekolah secara berkelanjutan."
+      </div>
+
+      <div class="flex justify-between items-end pt-4 text-xs text-slate-500">
+        <div class="text-left">
+          <div>Tanggal: <span id="cert-date">--/--/----</span></div>
+          <div>Stempel Digital P5: <span class="text-emerald-600 font-bold">VERIFIED ✅</span></div>
+        </div>
+        <div class="text-right">
+          <input type="text" id="cert-teacher-name" placeholder="Nama Guru Pendamping" class="text-right focus:outline-none border-b border-slate-300 block mb-1">
+          <div>Guru Pendamping IPAS/P5</div>
+        </div>
+      </div>
+
+      <div class="no-print flex gap-2 pt-4">
+        <button onclick="window.print()" class="flex-1 py-3 bg-emerald-600 text-white font-bold rounded-xl text-xs hover:bg-emerald-700">
+          🖨️ Cetak / Simpan PDF
+        </button>
+        <button onclick="closeModal('certificate-modal')" class="px-4 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl text-xs">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT GAME LOGIC -->
+  <script>
+    /* ==========================================================================
+       1. DATA SAMPAH (24 ITEMS: 12 ORGANIK, 12 ANORGANIK) WITH ORIGINAL SVG
+       ========================================================================== */
+    const WASTE_ITEMS = [
+      // ORGANIK (12)
+      {
+        id: 'apple',
+        name: 'Sisa Apel',
+        type: 'ORGANIK',
+        decay: '2–4 minggu',
+        desc: 'Berasal dari buah alami yang dimakan, mengandung air, dan bertekstur lunak.',
+        reason: 'Organik karena berasal dari tumbuhan! Sisa apel bisa membusuk secara alami dalam 2–4 minggu dan menjadi pupuk kompos yang menyuburkan tanah sekolah. 🌱',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M50 20 C40 10 25 15 25 35 C25 65 45 85 50 85 C55 85 75 65 75 35 C75 15 60 10 50 20 Z" fill="#EF4444"/><path d="M50 20 C48 10 52 5 55 5" stroke="#78350F" stroke-width="4" stroke-linecap="round"/><ellipse cx="38" cy="35" rx="4" ry="7" fill="white" opacity="0.3"/></svg>`
+      },
+      {
+        id: 'banana',
+        name: 'Kulit Pisang',
+        type: 'ORGANIK',
+        decay: '3–4 minggu',
+        desc: 'Kulit buah berwarna kuning kecokelatan, bertekstur licin di bagian dalam, mudah menghitam.',
+        reason: 'Organik! Kulit pisang kaya akan unsur kalium dan fosfor. Saat dikomposkan, mikroba tanah mengubahnya menjadi nutrisi terbaik untuk bunga mawar dan sayuran. 🌸',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M20 70 Q40 90 75 75 Q85 40 70 20 Q55 40 40 50 Z" fill="#FACC15"/><path d="M70 20 L75 12" stroke="#854D0E" stroke-width="4"/><path d="M20 70 Q35 60 70 20" stroke="#EAB308" stroke-width="2" fill="none"/></svg>`
+      },
+      {
+        id: 'leaf',
+        name: 'Daun Kering & Busuk',
+        type: 'ORGANIK',
+        decay: '1–3 bulan',
+        desc: 'Berasal dari ranting pohon, berwarna cokelat kemerahan atau kekuningan, rapuh jika diremas.',
+        reason: 'Organik! Daun kering adalah bahan cokelat alami yang sangat disukai cacing tanah. Cacing membantu mengubah daun gugur menjadi tanah humus yang gembur! 🪱',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M50 15 Q75 40 50 85 Q25 40 50 15 Z" fill="#B45309"/><path d="M50 15 V85 M50 35 L65 45 M50 50 L35 60 M50 65 L65 75" stroke="#78350F" stroke-width="3" stroke-linecap="round"/></svg>`
+      },
+      {
+        id: 'fishbone',
+        name: 'Tulang Ikan',
+        type: 'ORGANIK',
+        decay: '1–2 tahun',
+        desc: 'Bagian sisa rangka ikan setelah dimasak, berwarna putih keabuan, agak tajam.',
+        reason: 'Organik! Karena merupakan bagian tubuh makhluk hidup (hewan). Tulang ikan mengandung kalsium hewani yang baik diurai dalam tanah atau dijadikan pakan ternak olahan.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M15 50 H85 M25 50 L15 35 M25 50 L15 65 M35 30 V70 M50 35 V65 M65 40 V60 M85 50 L95 40 M85 50 L95 60" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/></svg>`
+      },
+      {
+        id: 'eggshell',
+        name: 'Cangkang Telur',
+        type: 'ORGANIK',
+        decay: '1–3 tahun',
+        desc: 'Kulit luar pelindung telur, tipis, rapuh, berwarna krem kecokelatan.',
+        reason: 'Organik! Cangkang telur terbuat dari kalsium karbonat alami. Jika ditumbuk halus dan ditaburkan di pot tanaman cabai atau tomat, tanaman akan tumbuh sangat kuat! 🌿',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M30 75 Q20 50 35 30 L45 40 L55 25 L65 40 L75 25 Q85 50 75 75 Z" fill="#FDE68A" stroke="#D97706" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'orange',
+        name: 'Kulit Jeruk',
+        type: 'ORGANIK',
+        decay: '6 bulan',
+        desc: 'Kulit buah berpori warna oranye segar, beraroma wangi sitrus khas.',
+        reason: 'Organik! Kulit jeruk mengandung minyak alami limonen yang bisa mengusir hama tanaman serta menebarkan aroma segar pada tumpukan komposter.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="35" fill="#F97316"/><circle cx="50" cy="50" r="30" fill="#FB923C" stroke="#EA580C" stroke-width="2" stroke-dasharray="4 4"/></svg>`
+      },
+      {
+        id: 'corn',
+        name: 'Bonggol Jagung',
+        type: 'ORGANIK',
+        decay: '1–2 tahun',
+        desc: 'Bagian tengah jagung yang keras berpori setelah biji jagung dimakan.',
+        reason: 'Organik! Kaya akan serat selulosa padat. Sangat cocok dijadikan media tumbuh jamur tiram atau dicacah sebagai campuran pupuk kompos berkualita tinggi.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="35" y="20" width="30" height="60" rx="15" fill="#EAB308"/><path d="M35 35 H65 M35 50 H65 M35 65 H65" stroke="#CA8A04" stroke-width="3"/></svg>`
+      },
+      {
+        id: 'bread',
+        name: 'Roti Berjamur',
+        type: 'ORGANIK',
+        decay: '1–2 minggu',
+        desc: 'Sisa potongan roti tawar yang mulai ditumbuhi bintik hijau kemerahan.',
+        reason: 'Organik! Sisa makanan karbohidrat ini sangat cepat diurai oleh mikroorganisme pembuat pupuk alami tanah.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M25 40 C25 25 75 25 75 40 L75 75 H25 Z" fill="#FDE68A" stroke="#B45309" stroke-width="3"/><circle cx="40" cy="50" r="4" fill="#059669"/><circle cx="55" cy="60" r="6" fill="#059669"/></svg>`
+      },
+      {
+        id: 'rice',
+        name: 'Sisa Nasi Basi',
+        type: 'ORGANIK',
+        decay: '3–7 hari',
+        desc: 'Butiran nasi sisa makan siang yang melunak dan berair.',
+        reason: 'Organik! Nasi basi mengandung karbohidrat tinggi yang menjadi bahan baku utama pembuatan Mikroorganisme Lokal (MOL) penyubur akar.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><ellipse cx="50" cy="60" rx="35" ry="15" fill="#CBD5E1"/><ellipse cx="50" cy="50" rx="30" ry="15" fill="#F8FAFC"/><circle cx="45" cy="48" r="3" fill="#94A3B8"/><circle cx="55" cy="52" r="3" fill="#94A3B8"/></svg>`
+      },
+      {
+        id: 'twig',
+        name: 'Ranting Kayu Kering',
+        type: 'ORGANIK',
+        decay: '1–3 tahun',
+        desc: 'Patahan cabang pohon kecil yang keras dan berwarna cokelat tua.',
+        reason: 'Organik! Ranting kayu menyumbang unsur Carbon (C) yang penting menjaga rongga udara pada tumpukan pengomposan.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M30 80 L70 20 M50 50 L75 60 M40 35 L20 25" stroke="#78350F" stroke-width="6" stroke-linecap="round"/></svg>`
+      },
+      {
+        id: 'teabag',
+        name: 'Kantong Teh Celup',
+        type: 'ORGANIK',
+        decay: '1–3 bulan',
+        desc: 'Kantong kertas berserat kecil berisi sisa daun teh seduh.',
+        reason: 'Organik! Sisa ampas teh kaya akan zat asam tanin yang disukai tanaman hias seperti keladi dan anggrek.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><polygon points="35,30 65,30 70,75 30,75" fill="#FEF3C7" stroke="#D97706" stroke-width="2"/><path d="M50 30 V10 M50 10 H60" stroke="#94A3B8" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'shell',
+        name: 'Cangkang Kerang',
+        type: 'ORGANIK',
+        decay: '2–5 tahun',
+        desc: 'Kulit keras hewan laut bercorak garis kipas kecokelatan.',
+        reason: 'Organik! Terbuat dari zat kapur kalsium alami makhluk hidup laut yang bermanfaat menetralkan derajat keasaman tanah pertanian.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M50 80 Q20 50 30 25 Q50 40 70 25 Q80 50 50 80 Z" fill="#FED7AA" stroke="#EA580C" stroke-width="2"/><path d="M50 80 L35 30 M50 80 L50 35 M50 80 L65 30" stroke="#EA580C" stroke-width="1.5"/></svg>`
+      },
+
+      // ANORGANIK (12)
+      {
+        id: 'plastic_bottle',
+        name: 'Botol Plastik Soda',
+        type: 'ANORGANIK',
+        decay: '±450 tahun',
+        desc: 'Terbuat dari bahan sintetis kimia plastik PET, bening atau biru muda, tidak mudah rusak oleh air.',
+        reason: 'Anorganik! Butuh waktu sekitar 450 tahun untuk terurai di alam! Jangan dibakar ya, botol ini harus dikumpulkan di bank sampah untuk didaur ulang jadi tas atau baju baru! ♻️',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="42" y="15" width="16" height="10" fill="#3B82F6"/><path d="M35 30 H65 L70 45 V80 C70 85 65 90 60 90 H40 C35 90 30 85 30 80 V45 Z" fill="#60A5FA" opacity="0.7" stroke="#2563EB" stroke-width="2"/><rect x="30" y="50" width="40" height="15" fill="#93C5FD"/></svg>`
+      },
+      {
+        id: 'snack_pack',
+        name: 'Bungkus Ciki / Snack',
+        type: 'ANORGANIK',
+        decay: '±100 tahun',
+        desc: 'Plastik berwarna-warni dengan lapisan dalam aluminium foil perak mengilap, renyah jika diremas.',
+        reason: 'Anorganik! Lapisan plastik dan logam ini tidak bisa membusuk oleh bakteri tanah. Kita bisa mengumpulkannya untuk membuat kerajinan ecobrick atau batu bata ramah lingkungan! 🧱',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><polygon points="25,20 75,15 80,85 20 80" fill="#EC4899" stroke="#BE185D" stroke-width="2"/><path d="M25 20 L30 15 L35 20 L40 15 L45 20 M20 80 L25 85 L30 80 L35 85" stroke="#BE185D" stroke-width="2"/><circle cx="50" cy="50" r="15" fill="#FACC15"/></svg>`
+      },
+      {
+        id: 'soda_can',
+        name: 'Kaleng Soda Aluminium',
+        type: 'ANORGANIK',
+        decay: '200–500 tahun',
+        desc: 'Terbuat dari logam aluminium tipis, dingin saat disentuh, berbunyi nyaring jika diketuk.',
+        reason: 'Anorganik! Logam tidak akan pernah membusuk di tanah, namun aluminium adalah juara daur ulang! Kaleng bekas bisa dilebur kembali menjadi kaleng baru hanya dalam 60 hari! ⚡',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="30" y="20" width="40" height="60" rx="8" fill="#EF4444" stroke="#DC2626" stroke-width="2"/><ellipse cx="50" cy="20" rx="20" ry="5" fill="#94A3B8"/><path d="M35 40 H65 M35 60 H65" stroke="white" stroke-width="3"/></svg>`
+      },
+      {
+        id: 'glass',
+        name: 'Pecahan Gelas Kaca',
+        type: 'ANORGANIK',
+        decay: '±1.000.000 tahun',
+        desc: 'Keras, tembus pandang, tepi tajam saat retak (butuh kehati-hatian).',
+        reason: 'Anorganik! Kaca dibuat dari pasir silika murni yang dipanaskan suhu tinggi. Kaca butuh waktu 1 juta tahun untuk hancur alami, tetapi bisa dilebur ulang 100% tanpa henti! 🛡️',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><polygon points="50,15 75,40 60,85 25,70 20,35" fill="#E0F2FE" stroke="#0284C7" stroke-width="3"/><line x1="50" y1="15" x2="45" y2="55" stroke="#38BDF8" stroke-width="2"/><line x1="75" y1="40" x2="45" y2="55" stroke="#38BDF8" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'straw',
+        name: 'Sedotan Plastik',
+        type: 'ANORGANIK',
+        decay: '±200 tahun',
+        desc: 'Tabung silinder tipis elastis bergaris warna-warni, sangat ringan.',
+        reason: 'Anorganik! Karena ringan, sedotan plastik sering tertiup angin dan mencemari laut serta membahayakan kura-kura. Biasakan membawa sedotan bambu atau stainless steel ya! 🐢',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M25 85 L70 15" stroke="#F43F5E" stroke-width="10" stroke-linecap="round"/><path d="M35 72 L38 76 M50 52 L53 56 M65 32 L68 36" stroke="white" stroke-width="6"/></svg>`
+      },
+      {
+        id: 'cardboard',
+        name: 'Kotak Kardus Karton',
+        type: 'ANORGANIK',
+        decay: '2–5 bulan',
+        desc: 'Lembaran kertas tebal berlapis gelombang cokelat kemasan paket.',
+        reason: 'Anorganik (kategori daur ulang kertas)! Meskipun berbahan serat kayu sintetis, kardus harus dikhususkan ke daur ulang kertas agar tidak menebang pohon baru.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M20 40 L50 20 L80 40 L80 80 L50 95 L20 80 Z" fill="#D97706" stroke="#92400E" stroke-width="2"/><path d="M20 40 L50 55 L80 40 M50 55 V95" stroke="#92400E" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'styrofoam',
+        name: 'Wadah Styrofoam',
+        type: 'ANORGANIK',
+        decay: '±500 tahun',
+        desc: 'Busa putih sangat ringan yang rapuh dan mudah terpecah jadi butiran.',
+        reason: 'Anorganik berbahaya! Terbuat dari polistirena yang sangat sulit terurai dan dapat melepaskan zat kimia berbahaya jika terkena makanan panas.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M20 40 H80 L75 75 H25 Z" fill="#F8FAFC" stroke="#94A3B8" stroke-width="3"/><rect x="15" y="30" width="70" height="10" rx="3" fill="#E2E8F0"/></svg>`
+      },
+      {
+        id: 'battery',
+        name: 'Baterai Bekas (Limbah B3)',
+        type: 'ANORGANIK',
+        decay: '100 tahun + racun B3',
+        desc: 'Tabung silinder berat berisi logam kimia seng, raksa, atau lithium.',
+        reason: 'Anorganik Berbahaya (B3)! Mengandung logam berat beracun yang dapat mencemari air tanah jika dibuang sembarangan ke tanah.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="35" y="30" width="30" height="55" rx="4" fill="#334155" stroke="#0F172A" stroke-width="2"/><rect x="43" y="22" width="14" height="8" rx="2" fill="#94A3B8"/><path d="M50 45 V65 M40 55 H60" stroke="#EF4444" stroke-width="4" stroke-linecap="round"/></svg>`
+      },
+      {
+        id: 'plastic_bag',
+        name: 'Kantong Plastik Kresek',
+        type: 'ANORGANIK',
+        decay: '50–100 tahun',
+        desc: 'Kantong tipis berpegangan tangan yang lentur dan gampang melayang.',
+        reason: 'Anorganik! Kantong plastik mudah hancur menjadi mikroplastik berbahaya yang termakan oleh ikan di sungai dan laut.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M30 35 C30 20 40 20 40 35 V45 H60 V35 C60 20 70 20 70 35 V45 L75 85 H25 L30 45 Z" fill="#A855F7" opacity="0.8" stroke="#7E22CE" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'mask',
+        name: 'Masker Medis Sekali Pakai',
+        type: 'ANORGANIK',
+        decay: '±450 tahun',
+        desc: 'Kain serat sintetis biru muda dengan tali pengait telinga melar.',
+        reason: 'Anorganik! Dibuat dari micro-fiber plastik polipropilena yang tidak bisa membusuk alami di dalam tanah.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><rect x="25" y="35" width="50" height="35" rx="5" fill="#38BDF8" stroke="#0284C7" stroke-width="2"/><path d="M25 40 L10 30 M25 65 L10 70 M75 40 L90 30 M75 65 L90 70" stroke="#94A3B8" stroke-width="2"/></svg>`
+      },
+      {
+        id: 'bottle_cap',
+        name: 'Tutup Botol Logam',
+        type: 'ANORGANIK',
+        decay: '50–100 tahun',
+        desc: 'Piringan logam bergerigi kecil penutup minuman botol kaca.',
+        reason: 'Anorganik! Terbuat dari plat besi baja tipis yang dapat didaur ulang bersama olahan besi tua.',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><circle cx="50" cy="50" r="30" fill="#94A3B8" stroke="#475569" stroke-width="4" stroke-dasharray="6 3"/></svg>`
+      },
+      {
+        id: 'cutlery',
+        name: 'Sendok Garpu Plastik',
+        type: 'ANORGANIK',
+        decay: '100–400 tahun',
+        desc: 'Alat makan putih kaku sekali pakai berbahan plastik sintetis.',
+        reason: 'Anorganik! Sangat sulit terurai. Biasakan membawa alat makan stainless steel sendiri dari rumah ya!',
+        svg: `<svg viewBox="0 0 100 100" class="w-full h-full"><path d="M35 20 Q35 45 45 45 V85 H55 V45 Q65 45 65 20 Z" fill="#E2E8F0" stroke="#64748B" stroke-width="2"/></svg>`
+      }
+    ];
+
+    /* ==========================================================================
+       2. GAME STATE MANAGEMENT
+       ========================================================================== */
+    let currentPhase = 'A'; // 'A', 'B', 'C'
+    let audioEnabled = true;
+    let maxLives = 3;
+    let currentLives = 3;
+    let currentScore = 0;
+    let currentItemIndex = 0;
+    let activeItemsQueue = [];
+    let timerInterval = null;
+    let timerSeconds = 10;
+
+    // Tournament State
+    let isTournament = false;
+    let totalGroups = 2;
+    let currentGroupIndex = 0;
+    let tournamentScores = [];
+
+    // Duel State
+    let isDuel = false;
+    let p1Index = 0, p2Index = 0;
+    let p1Score = 0, p2Score = 0;
+    let p1Queue = [], p2Queue = [];
+
+    /* ==========================================================================
+       3. WEB AUDIO API SYNTHESIZER (NO EXTERNAL AUDIO FILES)
+       ========================================================================== */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new AudioCtx();
+      }
+    }
+
+    function playSound(type) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+        osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'wrong') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now); // A3
+        osc.frequency.setValueAtTime(146.83, now + 0.15); // D3
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      } else if (type === 'win') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.setValueAtTime(554.37, now + 0.15);
+        osc.frequency.setValueAtTime(659.25, now + 0.3);
+        osc.frequency.setValueAtTime(880, now + 0.45);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        osc.start(now);
+        osc.stop(now + 0.8);
+      }
+    }
+
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      document.getElementById('audio-status').innerText = audioEnabled ? 'Suara: ON' : 'Suara: OFF';
+    }
+
+    /* ==========================================================================
+       4. UTILS & SHUFFLE (FISHER-YATES)
+       ========================================================================== */
+    function shuffleArray(array) {
+      let arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function showScreen(screenId) {
+      document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('duel-screen').classList.add('hidden');
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId !== 'game-screen') {
+        stopTimer();
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+    }
+
+    /* ==========================================================================
+       5. PHASE SELECTION & SETTINGS
+       ========================================================================== */
+    function selectPhase(phase) {
+      currentPhase = phase;
+      ['A', 'B', 'C'].forEach(p => {
+        const card = document.getElementById(`phase-card-${p}`);
+        if (p === phase) {
+          card.classList.add('border-emerald-500', 'bg-emerald-50/50');
+          card.classList.remove('border-slate-200', 'bg-white');
+        } else {
+          card.classList.remove('border-emerald-500', 'bg-emerald-50/50');
+          card.classList.add('border-slate-200', 'bg-white');
+        }
+      });
+
+      // Update Menu Subtitle according to phase
+      const titleText = document.getElementById('app-title-text');
+      if (phase === 'A') titleText.innerText = "Pahlawan Cilik Pemilah Sampah";
+      if (phase === 'B') titleText.innerText = "Detektif Sampah: Ke Mana Aku Harus Dibuang?";
+      if (phase === 'C') titleText.innerText = "Operasi Pilah Cepat: Sahabat Alam";
+    }
+
+    function openSettings() {
+      document.getElementById('settings-modal').classList.remove('hidden');
+    }
+
+    function updateSettings() {
+      maxLives = parseInt(document.getElementById('setting-lives').value);
+    }
+
+    /* ==========================================================================
+       6. SINGLE PLAYER GAMEPLAY
+       ========================================================================== */
+    function startSinglePlayer() {
+      isTournament = false;
+      isDuel = false;
+      document.getElementById('group-turn-badge').classList.add('hidden');
+      initGameSession();
+      showScreen('game-screen');
+    }
+
+    function initGameSession() {
+      currentLives = maxLives;
+      currentScore = 0;
+      currentItemIndex = 0;
+      activeItemsQueue = shuffleArray(WASTE_ITEMS).slice(0, 10); // Take 10 shuffled items
+      updateUI();
+      renderCurrentItem();
+
+      if (currentPhase === 'C') {
+        document.getElementById('timer-box').classList.remove('hidden');
+        resetTimer();
+      } else {
+        document.getElementById('timer-box').classList.add('hidden');
+      }
+    }
+
+    function updateUI() {
+      // Update Lives
+      let hearts = '';
+      if (currentLives === 999) {
+        hearts = '♾️';
+      } else {
+        for (let i = 0; i < maxLives; i++) {
+          hearts += i < currentLives ? '❤️' : '🖤';
+        }
+      }
+      document.getElementById('lives-display').innerText = hearts;
+
+      // Update Score
+      document.getElementById('score-display').innerText = currentScore;
+
+      // Update Stars
+      let stars = '⭐⭐⭐';
+      if (currentScore < 40) stars = '⭐☆☆';
+      else if (currentScore < 80) stars = '⭐⭐☆';
+      document.getElementById('stars-display').innerText = stars;
+
+      // Item Counter
+      document.getElementById('item-counter').innerText = `${currentItemIndex + 1} / 10`;
+    }
+
+    function renderCurrentItem() {
+      if (currentItemIndex >= activeItemsQueue.length) {
+        handleWin();
+        return;
+      }
+
+      const item = activeItemsQueue[currentItemIndex];
+      document.getElementById('item-name').innerText = item.name;
+      
+      // Phase B Detective Mode shows extra details
+      if (currentPhase === 'B') {
+        document.getElementById('item-desc').innerText = `🔍 Ciri: ${item.desc} (Waktu urai: ${item.decay})`;
+      } else {
+        document.getElementById('item-desc').innerText = item.desc;
+      }
+
+      document.getElementById('item-svg-container').innerHTML = item.svg;
+
+      if (currentPhase === 'C') {
+        resetTimer();
+      }
+    }
+
+    function handleSorting(userChoice) {
+      const currentItem = activeItemsQueue[currentItemIndex];
+
+      if (userChoice === currentItem.type) {
+        // Correct Choice
+        playSound('correct');
+        currentScore += 10;
+        currentItemIndex++;
+        updateUI();
+
+        // Visual animation feedback
+        const card = document.getElementById('item-card');
+        card.classList.add('scale-95', 'opacity-80');
+        setTimeout(() => {
+          card.classList.remove('scale-95', 'opacity-80');
+          renderCurrentItem();
+        }, 150);
+
+      } else {
+        // Wrong Choice
+        playSound('wrong');
+        if (currentLives !== 999) {
+          currentLives--;
+        }
+        updateUI();
+        showWrongFeedback(currentItem);
+
+        if (currentLives <= 0) {
+          stopTimer();
+          setTimeout(() => {
+            document.getElementById('gameover-modal').classList.remove('hidden');
+          }, 500);
+        }
+      }
+    }
+
+    function showWrongFeedback(item) {
+      stopTimer();
+      document.getElementById('wrong-reason').innerText = item.reason;
+      document.getElementById('wrong-modal').classList.remove('hidden');
+    }
+
+    function closeWrongModal() {
+      document.getElementById('wrong-modal').classList.add('hidden');
+      if (currentLives > 0) {
+        currentItemIndex++;
+        renderCurrentItem();
+      }
+    }
+
+    function refillLivesAndContinue() {
+      currentLives = 3;
+      updateUI();
+      closeModal('gameover-modal');
+      currentItemIndex++;
+      renderCurrentItem();
+    }
+
+    function restartCurrentGame() {
+      closeModal('gameover-modal');
+      closeModal('win-modal');
+      initGameSession();
+    }
+
+    function shuffleCurrentItems() {
+      activeItemsQueue = shuffleArray(WASTE_ITEMS).slice(0, 10);
+      currentItemIndex = 0;
+      renderCurrentItem();
+    }
+
+    /* ==========================================================================
+       7. TIMER FOR FASE C
+       ========================================================================== */
+    function resetTimer() {
+      stopTimer();
+      timerSeconds = 10;
+      document.getElementById('timer-display').innerText = `${timerSeconds}s`;
+      
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        document.getElementById('timer-display').innerText = `${timerSeconds}s`;
+        if (timerSeconds <= 0) {
+          stopTimer();
+          // Timeout counts as wrong choice
+          playSound('wrong');
+          if (currentLives !== 999) currentLives--;
+          updateUI();
+          if (currentLives <= 0) {
+            document.getElementById('gameover-modal').classList.remove('hidden');
+          } else {
+            currentItemIndex++;
+            renderCurrentItem();
+          }
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+    }
+
+    /* ==========================================================================
+       8. WIN & CERTIFICATE
+       ========================================================================== */
+    function handleWin() {
+      stopTimer();
+      playSound('win');
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+
+      if (isTournament) {
+        tournamentScores[currentGroupIndex].score = currentScore;
+        currentGroupIndex++;
+
+        if (currentGroupIndex < totalGroups) {
+          alert(`Kelompok Selesai! Giliran berikutnya: Kelompok ${currentGroupIndex + 1}`);
+          startGroupTurn();
+        } else {
+          showTournamentLeaderboard();
+        }
+      } else {
+        document.getElementById('win-modal').classList.remove('hidden');
+      }
+    }
+
+    function openCertificateModal() {
+      closeModal('win-modal');
+      const today = new Date().toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById('cert-date').innerText = today;
+      document.getElementById('certificate-modal').classList.remove('hidden');
+    }
+
+    /* ==========================================================================
+       9. TOURNAMENT MODE
+       ========================================================================== */
+    function startTournamentSetup() {
+      document.getElementById('tournament-setup-modal').classList.remove('hidden');
+    }
+
+    function setTournamentGroups(count) {
+      totalGroups = count;
+      currentGroupIndex = 0;
+      isTournament = true;
+      closeModal('tournament-setup-modal');
+
+      const groupNames = ["Bumi Asri 🌍", "Daur Ulang ♻️", "Pohon Lestari 🌳", "Sungai Bersih 💧"];
+      tournamentScores = [];
+      for (let i = 0; i < totalGroups; i++) {
+        tournamentScores.push({ name: `Kelompok ${i+1} (${groupNames[i]})`, score: 0 });
+      }
+
+      startGroupTurn();
+      showScreen('game-screen');
+    }
+
+    function startGroupTurn() {
+      const badge = document.getElementById('group-turn-badge');
+      badge.classList.remove('hidden');
+      badge.innerText = tournamentScores[currentGroupIndex].name;
+      initGameSession();
+    }
+
+    function showTournamentLeaderboard() {
+      // Sort scores descending
+      tournamentScores.sort((a, b) => b.score - a.score);
+
+      const listHtml = tournamentScores.map((g, idx) => {
+        const medals = ['🥇 Juara 1', '🥈 Juara 2', '🥉 Juara 3', '🎖️ Peserta'];
+        return `
+          <div class="flex justify-between items-center p-3 bg-purple-50 border border-purple-200 rounded-xl">
+            <span class="font-bold text-sm text-purple-900">${medals[idx] || ''} - ${g.name}</span>
+            <span class="font-game text-purple-700 text-lg">${g.score} Poin</span>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('leaderboard-list').innerHTML = listHtml;
+      document.getElementById('tournament-leaderboard-modal').classList.remove('hidden');
+    }
+
+    /* ==========================================================================
+       10. DUEL MODE (2 PLAYER SPLIT SCREEN)
+       ========================================================================== */
+    function startDuelMode() {
+      isDuel = true;
+      p1Score = 0;
+      p2Score = 0;
+      p1Index = 0;
+      p2Index = 0;
+      p1Queue = shuffleArray(WASTE_ITEMS);
+      p2Queue = shuffleArray(WASTE_ITEMS);
+
+      document.getElementById('p1-score').innerText = p1Score;
+      document.getElementById('p2-score').innerText = p2Score;
+
+      renderDuelCards();
+      showScreen('duel-screen');
+    }
+
+    function renderDuelCards() {
+      const item1 = p1Queue[p1Index];
+      document.getElementById('p1-name').innerText = item1.name;
+      document.getElementById('p1-svg').innerHTML = item1.svg;
+
+      const item2 = p2Queue[p2Index];
+      document.getElementById('p2-name').innerText = item2.name;
+      document.getElementById('p2-svg').innerHTML = item2.svg;
+    }
+
+    function handleDuelSort(player, choice) {
+      if (player === 1) {
+        const item = p1Queue[p1Index];
+        if (choice === item.type) {
+          playSound('correct');
+          p1Score += 10;
+        } else {
+          playSound('wrong');
+        }
+        p1Index = (p1Index + 1) % p1Queue.length;
+      } else {
+        const item = p2Queue[p2Index];
+        if (choice === item.type) {
+          playSound('correct');
+          p2Score += 10;
+        } else {
+          playSound('wrong');
+        }
+        p2Index = (p2Index + 1) % p2Queue.length;
+      }
+
+      document.getElementById('p1-score').innerText = p1Score;
+      document.getElementById('p2-score').innerText = p2Score;
+      renderDuelCards();
+
+      // Check Winner
+      if (p1Score >= 100 || p2Score >= 100) {
+        const winner = p1Score >= 100 ? 'Pemain 1 (Tim Hijau)' : 'Pemain 2 (Tim Biru)';
+        confetti({ particleCount: 150, spread: 80 });
+        alert(`🏆 SELAMAT! ${winner} MENANG DUEL!`);
+        showScreen('menu-screen');
+      }
+    }
+
+    /* ==========================================================================
+       11. ENCYCLOPEDIA & SPEECH SYNTHESIS
+       ========================================================================== */
+    function openEncyclopedia() {
+      renderEncyclopediaGrid(WASTE_ITEMS);
+      document.getElementById('encyclopedia-modal').classList.remove('hidden');
+    }
+
+    function closeEncyclopedia() {
+      document.getElementById('encyclopedia-modal').classList.add('hidden');
+    }
+
+    function renderEncyclopediaGrid(items) {
+      const grid = document.getElementById('encyclopedia-grid');
+      grid.innerHTML = items.map(item => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex gap-4 items-center">
+          <div class="w-16 h-16 flex-shrink-0">${item.svg}</div>
+          <div class="space-y-1 flex-grow">
+            <div class="flex justify-between items-center">
+              <h4 class="font-bold text-slate-800 text-sm">${item.name}</h4>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${item.type === 'ORGANIK' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'}">${item.type}</span>
+            </div>
+            <p class="text-[11px] text-slate-500">⏱️ Waktu urai: <b>${item.decay}</b></p>
+            <p class="text-[11px] text-slate-600 leading-tight">${item.reason}</p>
+            <button onclick="speakText('${item.name}. ${item.reason.replace(/'/g, "\\'")}')" class="text-[10px] bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-slate-700 font-bold">
+              🔊 Baca Narasi
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterEncyclopedia() {
+      const query = document.getElementById('enc-search').value.toLowerCase();
+      const filtered = WASTE_ITEMS.filter(item => item.name.toLowerCase().includes(query) || item.reason.toLowerCase().includes(query));
+      renderEncyclopediaGrid(filtered);
+    }
+
+    function filterEncCategory(cat) {
+      if (cat === 'ALL') renderEncyclopediaGrid(WASTE_ITEMS);
+      else renderEncyclopediaGrid(WASTE_ITEMS.filter(i => i.type === cat));
+    }
+
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'id-ID';
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    /* ==========================================================================
+       12. DRAG & DROP + KEYBOARD SHORTCUTS
+       ========================================================================== */
+    function setupDragAndDrop() {
+      const itemCard = document.getElementById('item-card');
+      const binOrg = document.getElementById('bin-organik');
+      const binAnorg = document.getElementById('bin-anorganik');
+
+      itemCard.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', 'trash');
+      });
+
+      [binOrg, binAnorg].forEach(bin => {
+        bin.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          bin.classList.add(bin.id === 'bin-organik' ? 'drag-over' : 'drag-over-blue');
+        });
+        bin.addEventListener('dragleave', () => {
+          bin.classList.remove('drag-over', 'drag-over-blue');
+        });
+        bin.addEventListener('drop', (e) => {
+          e.preventDefault();
+          bin.classList.remove('drag-over', 'drag-over-blue');
+          const type = bin.id === 'bin-organik' ? 'ORGANIK' : 'ANORGANIK';
+          handleSorting(type);
+        });
+      });
+    }
+
+    document.addEventListener('keydown', (e) => {
+      // Single Player Controls
+      if (!document.getElementById('game-screen').classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft') handleSorting('ORGANIK');
+        if (e.key === 'ArrowRight') handleSorting('ANORGANIK');
+      }
+      // Duel Controls
+      if (!document.getElementById('duel-screen').classList.contains('hidden')) {
+        if (e.key === 'w' || e.key === 'W') handleDuelSort(1, 'ORGANIK');
+        if (e.key === 's' || e.key === 'S') handleDuelSort(1, 'ANORGANIK');
+        if (e.key === 'ArrowUp') handleDuelSort(2, 'ORGANIK');
+        if (e.key === 'ArrowDown') handleDuelSort(2, 'ANORGANIK');
+      }
+    });
+
+    // Initialize Drag and Drop on load
+    window.onload = function() {
+      setupDragAndDrop();
+    };
+  </script>
+</body>
+</html>
